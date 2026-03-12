@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000') + '/api/v1'
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
+  baseURL: BASE_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -24,7 +26,7 @@ api.interceptors.response.use(
       original._retry = true
       try {
         const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+          `${BASE_URL}/auth/refresh`,
           {},
           { withCredentials: true }
         )

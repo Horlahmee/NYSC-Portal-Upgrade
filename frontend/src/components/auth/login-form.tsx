@@ -4,8 +4,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { api } from '@/lib/api'
+import { useAuthStore } from '@/store/auth'
+import { User } from '@/types'
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -16,6 +20,9 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const setAuth = useAuthStore((s) => s.setAuth)
+  const router = useRouter()
 
   const {
     register,
@@ -24,12 +31,38 @@ export function LoginForm() {
   } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) })
 
   async function onSubmit(data: LoginFormData) {
-    // TODO: call auth API
-    console.log(data)
+    setServerError(null)
+    try {
+      // 1. Exchange credentials for access token
+      const { data: tokens } = await api.post<{ accessToken: string; expiresIn: number }>(
+        '/auth/login',
+        data
+      )
+
+      // 2. Fetch the authenticated user's profile
+      const { data: user } = await api.get<User>('/auth/me', {
+        headers: { Authorization: `Bearer ${tokens.accessToken}` },
+      })
+
+      // 3. Persist in Zustand store (also writes to localStorage)
+      setAuth(user, tokens.accessToken)
+
+      router.push('/dashboard')
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+      setServerError(typeof msg === 'string' ? msg : 'Login failed. Please try again.')
+    }
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {serverError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {serverError}
+        </div>
+      )}
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
           Email Address
