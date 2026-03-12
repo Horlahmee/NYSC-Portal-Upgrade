@@ -4,7 +4,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { api } from '@/lib/api'
 
 const registerSchema = z
   .object({
@@ -25,6 +27,9 @@ type RegisterFormData = z.infer<typeof registerSchema>
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const router = useRouter()
 
   const {
     register,
@@ -33,12 +38,40 @@ export function RegisterForm() {
   } = useForm<RegisterFormData>({ resolver: zodResolver(registerSchema) })
 
   async function onSubmit(data: RegisterFormData) {
-    // TODO: call auth API
-    console.log(data)
+    setServerError(null)
+    try {
+      const { confirmPassword: _, ...payload } = data
+      await api.post('/auth/register', payload)
+      setSuccess(true)
+      // Redirect to login after a short delay so the user can read the message
+      setTimeout(() => router.push('/login'), 3000)
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message
+      const text = Array.isArray(msg) ? msg[0] : msg
+      setServerError(typeof text === 'string' ? text : 'Registration failed. Please try again.')
+    }
+  }
+
+  if (success) {
+    return (
+      <div className="rounded-lg bg-green-50 border border-green-200 px-5 py-6 text-center space-y-2">
+        <p className="font-semibold text-green-800">Account created successfully!</p>
+        <p className="text-sm text-green-700">
+          Please check your email to verify your account. Redirecting to login…
+        </p>
+      </div>
+    )
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {serverError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {serverError}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">First Name</label>
