@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle, XCircle, Clock } from 'lucide-react'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { CourseCorrection, CorrectionStatus } from '@/types'
 import { exportToCsv } from '@/lib/csv'
@@ -19,7 +20,11 @@ function useReviewCorrection() {
   return useMutation({
     mutationFn: ({ id, status, reviewNote }: { id: string; status: string; reviewNote?: string }) =>
       api.patch(`/admin/corrections/${id}/review`, { status, reviewNote }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'corrections'] }),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ['admin', 'corrections'] })
+      toast.success(`Correction ${variables.status === 'approved' ? 'approved' : 'rejected'} successfully.`)
+    },
+    onError: () => toast.error('Failed to review correction. Please try again.'),
   })
 }
 

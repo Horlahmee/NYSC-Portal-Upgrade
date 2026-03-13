@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
 const schema = z.object({
@@ -31,13 +32,16 @@ export function CourseCorrectionForm() {
     try {
       await api.post('/corrections', data)
       await queryClient.invalidateQueries({ queryKey: ['corrections', 'mine'] })
+      toast.success('Correction request submitted — it is now under review.')
       setSubmitted(true)
       reset()
       setTimeout(() => setSubmitted(false), 4000)
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message
       const text = Array.isArray(msg) ? msg[0] : msg
-      setServerError(typeof text === 'string' ? text : 'Submission failed. Please try again.')
+      const errorText = typeof text === 'string' ? text : 'Submission failed. Please try again.'
+      setServerError(errorText)
+      toast.error(errorText)
     }
   }
 
