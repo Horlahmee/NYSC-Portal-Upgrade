@@ -48,16 +48,21 @@ export class AdminService {
     return this.usersService.findAll(search, page, limit)
   }
 
-  async getAllCorrections() {
-    return this.correctionsService.findAll()
+  async getAllCorrections(page = 1, limit = 50) {
+    return this.correctionsService.findAll(page, limit)
   }
 
   async reviewCorrection(id: string, reviewedBy: string, status: string, reviewNote?: string) {
     return this.correctionsService.review(id, reviewedBy, status, reviewNote)
   }
 
-  async getAllClearances() {
-    return this.clearanceRepo.find({ order: { createdAt: 'DESC' } })
+  async getAllClearances(page = 1, limit = 50) {
+    const [items, total] = await this.clearanceRepo.findAndCount({
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    })
+    return { items, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
   async updateClearance(id: string, clearedBy: string, status: string, notes?: string, queryReason?: string) {

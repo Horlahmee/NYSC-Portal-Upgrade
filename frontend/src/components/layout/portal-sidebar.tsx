@@ -8,9 +8,6 @@ import {
   CreditCard,
   FileEdit,
   CheckSquare,
-  AlertTriangle,
-  Bell,
-  User,
   LogOut,
   X,
 } from 'lucide-react'
@@ -23,9 +20,6 @@ const navItems = [
   { href: '/payment', label: 'Payment', icon: CreditCard },
   { href: '/course-correction', label: 'Course Correction', icon: FileEdit },
   { href: '/lga-clearance', label: 'LGA Clearance', icon: CheckSquare },
-  { href: '/disciplinary', label: 'Disciplinary', icon: AlertTriangle },
-  { href: '/notifications', label: 'Notifications', icon: Bell },
-  { href: '/profile', label: 'My Profile', icon: User },
 ]
 
 export function PortalSidebar() {

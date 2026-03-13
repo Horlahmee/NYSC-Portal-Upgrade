@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, BadRequestException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { ConfigService } from '@nestjs/config'
 import axios from 'axios'
 import * as crypto from 'crypto'
 import { Payment } from './entities/payment.entity'
+import { UsersService } from '../users/users.service'
 
 @Injectable()
 export class PaymentsService {
@@ -12,13 +13,19 @@ export class PaymentsService {
     @InjectRepository(Payment)
     private readonly paymentRepo: Repository<Payment>,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {}
 
-  async generateRrr(memberId: string, amount: number, paymentType: string) {
+  async generateRrr(userId: string, amount: number, paymentType: string) {
+    // Resolve user → corps member
+    const member = await this.usersService.findCorpsMemberByUserId(userId)
+    if (!member) throw new BadRequestException('Corps member profile not found. Please complete your registration.')
+
     const merchantId = this.configService.get('REMITA_MERCHANT_ID')
     const serviceTypeId = this.configService.get('REMITA_SERVICE_TYPE_ID')
     const apiKey = this.configService.get('REMITA_API_KEY')
     const orderId = `NYSC-${Date.now()}`
+    const payerName = `${member.firstName} ${member.lastName}`
 
     const hash = crypto
       .createHash('sha512')
@@ -31,7 +38,7 @@ export class PaymentsService {
         serviceTypeId,
         amount,
         orderId,
-        payerName: memberId,
+        payerName,
         payerEmail: '',
         payerPhone: '',
         description: `NYSC ${paymentType}`,
@@ -42,7 +49,7 @@ export class PaymentsService {
     const rrr = response.data?.RRR
 
     const payment = await this.paymentRepo.save({
-      memberId,
+      memberId: member.id,
       rrr,
       amount,
       paymentType,
@@ -76,9 +83,11 @@ export class PaymentsService {
     return { rrr, status, data: response.data }
   }
 
-  async getMemberPayments(memberId: string) {
+  async getMemberPayments(userId: string) {
+    const member = await this.usersService.findCorpsMemberByUserId(userId)
+    if (!member) return []
     return this.paymentRepo.find({
-      where: { memberId },
+      where: { memberId: member.id },
       order: { createdAt: 'DESC' },
     })
   }

@@ -33,6 +33,10 @@ export class AuthService {
 
     const passwordHash = await bcrypt.hash(dto.password, 12)
     const user = await this.usersService.create({ ...dto, passwordHash })
+
+    // Create a stub CorpsMember profile linked to the new user
+    await this.usersService.createCorpsMember(user.id, dto.firstName, dto.lastName)
+
     return { message: 'Registration successful. Please verify your email.' }
   }
 
@@ -106,7 +110,8 @@ export class AuthService {
   async logout(req: Request, res: Response) {
     const token = req.cookies?.refresh_token
     if (token) {
-      await this.refreshTokenRepo.update({ tokenHash: token }, { revoked: true })
+      const tokenHash = await bcrypt.hash(token, 1)
+      await this.refreshTokenRepo.update({ tokenHash }, { revoked: true })
     }
     res.clearCookie('refresh_token')
     return { message: 'Logged out successfully' }

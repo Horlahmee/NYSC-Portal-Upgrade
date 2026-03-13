@@ -8,10 +8,20 @@ import { api } from '@/lib/api'
 import { LgaClearance, ClearanceStatus } from '@/types'
 import { exportToCsv } from '@/lib/csv'
 
-function useClearances() {
+interface PagedResponse<T> {
+  items: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+function useClearances(page: number) {
   return useQuery({
-    queryKey: ['admin', 'clearances'],
-    queryFn: () => api.get<LgaClearance[]>('/admin/clearances').then((r) => r.data),
+    queryKey: ['admin', 'clearances', page],
+    queryFn: () =>
+      api.get<PagedResponse<LgaClearance>>('/admin/clearances', { params: { page, limit: 50 } }).then((r) => r.data),
+    placeholderData: (prev) => prev,
   })
 }
 
@@ -37,14 +47,16 @@ const statusConfig: Record<ClearanceStatus, { icon: React.ReactNode; label: stri
 }
 
 export function ClearanceQueue() {
-  const { data, isLoading } = useClearances()
+  const [page, setPage] = useState(1)
+  const { data, isLoading } = useClearances(page)
   const update = useUpdateClearance()
   const [selected, setSelected] = useState<LgaClearance | null>(null)
   const [notes, setNotes] = useState('')
   const [queryReason, setQueryReason] = useState('')
   const [filter, setFilter] = useState<ClearanceStatus | 'all'>('all')
 
-  const filtered = (data ?? []).filter((c) => filter === 'all' || c.status === filter)
+  const items = data?.items ?? []
+  const filtered = items.filter((c) => filter === 'all' || c.status === filter)
 
   function openAction(c: LgaClearance) {
     setSelected(c)
@@ -76,11 +88,11 @@ export function ClearanceQueue() {
             </button>
           ))}
         </div>
-        {data && data.length > 0 && (
+        {items.length > 0 && (
           <button
             onClick={() =>
               exportToCsv(
-                data.map((c) => ({
+                items.map((c) => ({
                   ID: c.id,
                   MemberID: c.memberId,
                   LGAID: c.lgaId,
@@ -109,6 +121,17 @@ export function ClearanceQueue() {
 
         {!isLoading && filtered.length === 0 && (
           <p className="text-sm text-gray-400 text-center py-8">No clearance records found.</p>
+        )}
+
+        {data && data.totalPages > 1 && (
+          <div className="flex items-center justify-between pt-3 text-sm text-gray-500">
+            <p>{data.total} total</p>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs">Previous</button>
+              <span className="text-xs">Page {data.page} of {data.totalPages}</span>
+              <button onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))} disabled={page >= data.totalPages} className="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs">Next</button>
+            </div>
+          </div>
         )}
 
         {!isLoading && filtered.length > 0 && (
