@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { clsx } from 'clsx'
 import {
   LayoutDashboard,
@@ -13,6 +13,8 @@ import {
   User,
   LogOut,
 } from 'lucide-react'
+import { api } from '@/lib/api'
+import { useAuthStore } from '@/store/auth'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -26,6 +28,20 @@ const navItems = [
 
 export function PortalSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const user = useAuthStore((s) => s.user)
+  const clearAuth = useAuthStore((s) => s.clearAuth)
+
+  async function handleLogout() {
+    try {
+      await api.post('/auth/logout')
+    } catch {
+      // Proceed with local logout even if the server call fails
+    } finally {
+      clearAuth()
+      router.push('/login')
+    }
+  }
 
   return (
     <aside className="w-64 bg-nysc-green text-white flex flex-col min-h-screen hidden md:flex">
@@ -37,7 +53,9 @@ export function PortalSidebar() {
           </div>
           <div>
             <p className="font-bold text-sm leading-none">NYSC Portal</p>
-            <p className="text-xs text-green-300">Corps Member</p>
+            <p className="text-xs text-green-300 truncate max-w-[110px]">
+              {user?.email ?? 'Corps Member'}
+            </p>
           </div>
         </div>
       </div>
@@ -63,7 +81,10 @@ export function PortalSidebar() {
 
       {/* Logout */}
       <div className="p-4 border-t border-green-700">
-        <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-green-200 hover:bg-white/10 hover:text-white transition-colors w-full">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-green-200 hover:bg-white/10 hover:text-white transition-colors w-full"
+        >
           <LogOut size={18} />
           Logout
         </button>
