@@ -3,7 +3,10 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 
 const schema = z.object({
   correctionType: z.string().min(1, 'Select a correction type'),
@@ -15,17 +18,45 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 export function CourseCorrectionForm() {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const [serverError, setServerError] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const queryClient = useQueryClient()
+
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
   async function onSubmit(data: FormData) {
-    console.log(data)
+    setServerError(null)
+    try {
+      await api.post('/corrections', data)
+      await queryClient.invalidateQueries({ queryKey: ['corrections', 'mine'] })
+      setSubmitted(true)
+      reset()
+      setTimeout(() => setSubmitted(false), 4000)
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message
+      const text = Array.isArray(msg) ? msg[0] : msg
+      setServerError(typeof text === 'string' ? text : 'Submission failed. Please try again.')
+    }
   }
 
   return (
     <div className="card">
       <h2 className="font-semibold text-gray-900 mb-4">New Correction Request</h2>
+
+      {submitted && (
+        <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+          Request submitted successfully. It is now under review.
+        </div>
+      )}
+
+      {serverError && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {serverError}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Correction Type</label>
