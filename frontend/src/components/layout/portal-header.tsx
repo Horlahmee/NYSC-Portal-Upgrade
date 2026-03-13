@@ -1,8 +1,16 @@
 'use client'
 
 import { Bell, Menu } from 'lucide-react'
+import { useAuthStore } from '@/store/auth'
 
 export function PortalHeader() {
+  const user = useAuthStore((s) => s.user)
+
+  // Use the first character of the email as a temporary avatar until
+  // the full CorpsMember profile is loaded in a later task.
+  const initials = user?.email?.[0]?.toUpperCase() ?? 'CM'
+  const displayName = user?.email ?? 'Corps Member'
+
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
       <button className="md:hidden p-2 rounded-lg hover:bg-gray-100">
@@ -16,9 +24,9 @@ export function PortalHeader() {
         </button>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-nysc-green text-white rounded-full flex items-center justify-center text-xs font-bold">
-            CM
+            {initials}
           </div>
-          <span className="text-sm font-medium text-gray-700 hidden sm:block">Corps Member</span>
+          <span className="text-sm font-medium text-gray-700 hidden sm:block">{displayName}</span>
         </div>
       </div>
     </header>
