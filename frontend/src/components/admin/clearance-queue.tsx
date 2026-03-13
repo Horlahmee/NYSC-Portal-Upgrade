@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 import { LgaClearance, ClearanceStatus } from '@/types'
 import { exportToCsv } from '@/lib/csv'
@@ -19,7 +20,12 @@ function useUpdateClearance() {
   return useMutation({
     mutationFn: ({ id, status, notes, queryReason }: { id: string; status: string; notes?: string; queryReason?: string }) =>
       api.patch(`/admin/clearances/${id}`, { status, notes, queryReason }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin', 'clearances'] }),
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: ['admin', 'clearances'] })
+      const label = variables.status === 'cleared' ? 'cleared' : variables.status === 'query' ? 'queried' : 'withheld'
+      toast.success(`Clearance ${label} successfully.`)
+    },
+    onError: () => toast.error('Failed to update clearance. Please try again.'),
   })
 }
 
