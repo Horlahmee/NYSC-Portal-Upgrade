@@ -8,5 +8,6 @@ import { CourseCorrection } from './entities/course-correction.entity'
   imports: [TypeOrmModule.forFeature([CourseCorrection])],
   controllers: [CorrectionsController],
   providers: [CorrectionsService],
+  exports: [CorrectionsService],
 })
 export class CorrectionsModule {}

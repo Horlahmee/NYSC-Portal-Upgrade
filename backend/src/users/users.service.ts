@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { ILike, Repository } from 'typeorm'
 import { User } from './entities/user.entity'
 
 @Injectable()
@@ -40,5 +40,19 @@ export class UsersService {
 
   async resetFailedAttempts(id: string): Promise<void> {
     await this.userRepo.update(id, { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() })
+  }
+
+  async findAll(search?: string, page = 1, limit = 20) {
+    const where = search
+      ? [{ email: ILike(`%${search}%`) }, { phone: ILike(`%${search}%`) }]
+      : undefined
+    const [users, total] = await this.userRepo.findAndCount({
+      where,
+      order: { createdAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+      select: ['id', 'email', 'phone', 'role', 'isEmailVerified', 'lastLoginAt', 'createdAt'],
+    })
+    return { users, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 }
