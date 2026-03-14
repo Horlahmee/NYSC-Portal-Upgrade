@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Loader2, Copy, CheckCheck } from 'lucide-react'
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { api } from '@/lib/api'
 
 const PAYMENT_TYPES: { label: string; value: string; amount: number }[] = [
@@ -31,11 +32,13 @@ export function InitiatePayment() {
         { amount: selected.amount, paymentType: selected.value }
       )
       setRrr(data.rrr)
-      // Refresh payment history table
+      toast.success('RRR generated successfully!')
       await queryClient.invalidateQueries({ queryKey: ['payments', 'history'] })
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-      setError(typeof msg === 'string' ? msg : 'Failed to generate RRR. Try again.')
+      const errorText = typeof msg === 'string' ? msg : 'Failed to generate RRR. Try again.'
+      setError(errorText)
+      toast.error(errorText)
     } finally {
       setLoading(false)
     }
