@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { ILike, Repository } from 'typeorm'
 import { User } from './entities/user.entity'
+import { CorpsMember } from './entities/corps-member.entity'
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    @InjectRepository(CorpsMember)
+    private readonly corpsMemberRepo: Repository<CorpsMember>,
   ) {}
 
   async findById(id: string): Promise<User | null> {
@@ -54,5 +57,14 @@ export class UsersService {
       select: ['id', 'email', 'phone', 'role', 'isEmailVerified', 'lastLoginAt', 'createdAt'],
     })
     return { users, total, page, limit, totalPages: Math.ceil(total / limit) }
+  }
+
+  async createCorpsMember(userId: string, firstName: string, lastName: string): Promise<CorpsMember> {
+    const member = this.corpsMemberRepo.create({ userId, firstName, lastName, status: 'pending' })
+    return this.corpsMemberRepo.save(member)
+  }
+
+  async findCorpsMemberByUserId(userId: string): Promise<CorpsMember | null> {
+    return this.corpsMemberRepo.findOne({ where: { userId } })
   }
 }

@@ -8,10 +8,20 @@ import { api } from '@/lib/api'
 import { CourseCorrection, CorrectionStatus } from '@/types'
 import { exportToCsv } from '@/lib/csv'
 
-function useCorrections() {
+interface PagedResponse<T> {
+  items: T[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
+function useCorrections(page: number) {
   return useQuery({
-    queryKey: ['admin', 'corrections'],
-    queryFn: () => api.get<CourseCorrection[]>('/admin/corrections').then((r) => r.data),
+    queryKey: ['admin', 'corrections', page],
+    queryFn: () =>
+      api.get<PagedResponse<CourseCorrection>>('/admin/corrections', { params: { page, limit: 50 } }).then((r) => r.data),
+    placeholderData: (prev) => prev,
   })
 }
 
@@ -43,13 +53,15 @@ const statusLabel: Record<CorrectionStatus, string> = {
 }
 
 export function CorrectionsQueue() {
-  const { data, isLoading } = useCorrections()
+  const [page, setPage] = useState(1)
+  const { data, isLoading } = useCorrections(page)
   const review = useReviewCorrection()
   const [selected, setSelected] = useState<CourseCorrection | null>(null)
   const [reviewNote, setReviewNote] = useState('')
   const [filter, setFilter] = useState<CorrectionStatus | 'all'>('all')
 
-  const filtered = (data ?? []).filter((c) => filter === 'all' || c.status === filter)
+  const items = data?.items ?? []
+  const filtered = items.filter((c) => filter === 'all' || c.status === filter)
 
   function openReview(c: CourseCorrection) {
     setSelected(c)
@@ -80,11 +92,11 @@ export function CorrectionsQueue() {
             </button>
           ))}
         </div>
-        {data && data.length > 0 && (
+        {items.length > 0 && (
           <button
             onClick={() =>
               exportToCsv(
-                data.map((c) => ({
+                items.map((c) => ({
                   ID: c.id,
                   MemberID: c.memberId,
                   Type: c.correctionType,
@@ -112,6 +124,18 @@ export function CorrectionsQueue() {
 
         {!isLoading && filtered.length === 0 && (
           <p className="text-sm text-gray-400 text-center py-8">No correction requests found.</p>
+        )}
+
+        {/* Pagination */}
+        {data && data.totalPages > 1 && (
+          <div className="flex items-center justify-between pt-3 text-sm text-gray-500">
+            <p>{data.total} total</p>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs">Previous</button>
+              <span className="text-xs">Page {data.page} of {data.totalPages}</span>
+              <button onClick={() => setPage((p) => Math.min(data.totalPages, p + 1))} disabled={page >= data.totalPages} className="px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs">Next</button>
+            </div>
+          </div>
         )}
 
         {!isLoading && filtered.length > 0 && (
