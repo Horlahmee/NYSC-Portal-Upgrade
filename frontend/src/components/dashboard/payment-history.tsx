@@ -66,7 +66,7 @@ export function PaymentHistory() {
                   <td className="py-3 text-gray-700 capitalize">{p.paymentType}</td>
                   <td className="py-3 font-medium tabular">₦{Number(p.amount).toLocaleString()}</td>
                   <td className="py-3 text-gray-500">
-                    {new Date(p.createdAt).toLocaleDateString('en-NG')}
+                    {new Date(p.createdAt ?? p.initiatedAt).toLocaleDateString('en-NG')}
                   </td>
                   <td className="py-3">
                     <span className={statusBadge[p.status] ?? 'badge-warning'}>{p.status}</span>

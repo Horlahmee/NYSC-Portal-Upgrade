@@ -104,7 +104,7 @@ export function ClearanceStatus() {
                       <p className="text-xs text-gray-500 mt-0.5">{c.notes}</p>
                     )}
                     <p className="text-xs text-gray-400 mt-1">
-                      Submitted {new Date(c.createdAt).toLocaleDateString('en-NG')}
+                      {c.createdAt && <>Submitted {new Date(c.createdAt).toLocaleDateString('en-NG')}</>}
                     </p>
                   </div>
                   <span className={`text-xs font-medium capitalize flex-shrink-0 ${s.color}`}>
