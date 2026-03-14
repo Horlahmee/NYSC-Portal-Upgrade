@@ -8,22 +8,18 @@ import {
   CreditCard,
   FileEdit,
   CheckSquare,
-  AlertTriangle,
-  Bell,
-  User,
   LogOut,
+  X,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/auth'
+import { useSidebarStore } from '@/store/sidebar'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/payment', label: 'Payment', icon: CreditCard },
   { href: '/course-correction', label: 'Course Correction', icon: FileEdit },
   { href: '/lga-clearance', label: 'LGA Clearance', icon: CheckSquare },
-  { href: '/disciplinary', label: 'Disciplinary', icon: AlertTriangle },
-  { href: '/notifications', label: 'Notifications', icon: Bell },
-  { href: '/profile', label: 'My Profile', icon: User },
 ]
 
 export function PortalSidebar() {
@@ -31,28 +27,22 @@ export function PortalSidebar() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const clearAuth = useAuthStore((s) => s.clearAuth)
+  const isOpen = useSidebarStore((s) => s.isOpen)
+  const close = useSidebarStore((s) => s.close)
 
   const initial = user?.email?.[0]?.toUpperCase() ?? 'C'
   const displayEmail = user?.email ?? 'Corps Member'
 
   async function handleLogout() {
-    try {
-      await api.post('/auth/logout')
-    } catch {
-      // Proceed with local logout even if the server call fails
-    } finally {
-      clearAuth()
-      router.push('/login')
-    }
+    try { await api.post('/auth/logout') } catch { /* continue */ }
+    clearAuth()
+    router.push('/login')
   }
 
-  return (
-    <aside
-      className="w-64 flex flex-col min-h-screen hidden md:flex shrink-0"
-      style={{ background: 'linear-gradient(180deg, #002800 0%, #004500 60%, #005000 100%)' }}
-    >
-      {/* Logo / user area */}
-      <div className="p-5 border-b border-white/10">
+  const sidebarContent = (
+    <aside className="w-64 bg-nysc-green text-white flex flex-col h-full">
+      {/* Logo */}
+      <div className="p-6 border-b border-green-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-nysc-gold rounded-xl flex items-center justify-center font-black text-nysc-green-deep text-xs shrink-0">
             NYSC
@@ -62,44 +52,29 @@ export function PortalSidebar() {
             <p className="text-[11px] text-green-400 truncate mt-0.5">{displayEmail}</p>
           </div>
         </div>
+        <button onClick={close} className="md:hidden p-1 rounded hover:bg-white/10" aria-label="Close navigation">
+          <X size={18} />
+        </button>
       </div>
 
-      {/* Nav section label */}
-      <div className="px-5 pt-5 pb-2">
-        <p className="text-[10px] text-green-600 font-bold uppercase tracking-[0.18em]">
-          Menu
-        </p>
-      </div>
-
-      {/* Nav items */}
-      <nav className="flex-1 px-3 space-y-0.5 pb-4">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href || pathname.startsWith(href + '/')
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={clsx(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 relative',
-                isActive
-                  ? 'bg-white/15 text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:bg-nysc-gold before:rounded-full'
-                  : 'text-green-300 hover:bg-white/10 hover:text-white'
-              )}
-            >
-              <Icon
-                size={17}
-                className={clsx(
-                  'shrink-0 transition-colors',
-                  isActive ? 'text-nysc-gold' : 'text-green-400 group-hover:text-green-200'
-                )}
-              />
-              <span className="flex-1">{label}</span>
-              {isActive && (
-                <span className="w-1.5 h-1.5 bg-nysc-gold rounded-full shrink-0" />
-              )}
-            </Link>
-          )
-        })}
+      {/* Nav */}
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        {navItems.map(({ href, label, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={close}
+            className={clsx(
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+              pathname === href || pathname.startsWith(href + '/')
+                ? 'bg-white/20 text-white'
+                : 'text-green-200 hover:bg-white/10 hover:text-white'
+            )}
+          >
+            <Icon size={18} />
+            {label}
+          </Link>
+        ))}
       </nav>
 
       {/* Avatar strip + logout */}
@@ -121,5 +96,30 @@ export function PortalSidebar() {
         </button>
       </div>
     </aside>
+  )
+
+  return (
+    <>
+      {/* Desktop: always visible */}
+      <div className="hidden md:flex w-64 min-h-screen flex-shrink-0">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile: overlay drawer */}
+      {isOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={close}
+            aria-hidden="true"
+          />
+          {/* Drawer */}
+          <div className="relative z-50 flex flex-col w-64 min-h-screen shadow-xl">
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   )
 }

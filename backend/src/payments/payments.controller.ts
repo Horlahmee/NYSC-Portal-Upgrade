@@ -3,6 +3,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { Request } from 'express'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { PaymentsService } from './payments.service'
+import { GenerateRrrDto } from './dto/generate-rrr.dto'
 
 @ApiTags('Payments')
 @ApiBearerAuth()
@@ -13,7 +14,7 @@ export class PaymentsController {
 
   @Post('generate-rrr')
   @ApiOperation({ summary: 'Generate Remita RRR for payment' })
-  generateRrr(@Body() body: { amount: number; paymentType: string }, @Req() req: any) {
+  generateRrr(@Body() body: GenerateRrrDto, @Req() req: any) {
     return this.paymentsService.generateRrr(req.user.id, body.amount, body.paymentType)
   }
 
