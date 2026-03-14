@@ -11,6 +11,8 @@ export interface User {
   role: UserRole
   isEmailVerified: boolean
   isPhoneVerified: boolean
+  lastLoginAt?: string
+  createdAt?: string
 }
 
 export interface CorpsMember {
@@ -70,6 +72,8 @@ export interface Payment {
   initiatedAt: string
   createdAt?: string
   confirmedAt?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface CourseCorrection {
@@ -81,8 +85,10 @@ export interface CourseCorrection {
   reason?: string
   status: CorrectionStatus
   reviewNote?: string
+  reviewedBy?: string
   reviewedAt?: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface LgaClearance {
@@ -90,10 +96,19 @@ export interface LgaClearance {
   memberId: string
   lgaId: number
   status: ClearanceStatus
+  clearedBy?: string
   queryReason?: string
   notes?: string
-  createdAt?: string
   clearedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AdminStats {
+  totalMembers: number
+  pendingPayments: number
+  pendingCorrections: number
+  pendingClearances: number
 }
 
 export interface AuthTokens {

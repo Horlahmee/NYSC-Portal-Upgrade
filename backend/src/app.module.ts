@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { HealthController } from './health.controller'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ThrottlerModule } from '@nestjs/throttler'
 import { AuthModule } from './auth/auth.module'
@@ -40,5 +41,6 @@ import { AdminModule } from './admin/admin.module'
     NotificationsModule,
     AdminModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

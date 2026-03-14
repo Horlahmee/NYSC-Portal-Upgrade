@@ -3,7 +3,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_API_URL": "@next_public_api_url"
+    "NEXT_PUBLIC_API_URL": "NEXT_PUBLIC_API_URL=nysc-portal-upgrade-production.up.railway.app",
+    "NEXT_PUBLIC_APP_NAME": "NYSC Portal"
   },
   "headers": [
     {
@@ -11,7 +12,8 @@
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" }
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }
   ]
