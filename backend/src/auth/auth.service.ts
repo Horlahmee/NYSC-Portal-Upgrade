@@ -7,6 +7,7 @@ import { Repository } from 'typeorm'
 import { ConfigService } from '@nestjs/config'
 import { Request, Response } from 'express'
 import * as bcrypt from 'bcryptjs'
+import { createHash } from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
 import { UsersService } from '../users/users.service'
 import { RegisterDto } from './dto/register.dto'
@@ -89,7 +90,7 @@ export class AuthService {
     const token = req.cookies?.refresh_token
     if (!token) throw new UnauthorizedException()
 
-    const tokenHash = await bcrypt.hash(token, 1)
+    const tokenHash = createHash('sha256').update(token).digest('hex')
     const stored = await this.refreshTokenRepo.findOne({
       where: { tokenHash },
       relations: ['user'],
@@ -113,7 +114,12 @@ export class AuthService {
       const tokenHash = await bcrypt.hash(token, 1)
       await this.refreshTokenRepo.update({ tokenHash }, { revoked: true })
     }
-    res.clearCookie('refresh_token')
+    const isProduction = this.configService.get('NODE_ENV') === 'production'
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    })
     return { message: 'Logged out successfully' }
   }
 
@@ -123,15 +129,16 @@ export class AuthService {
 
   private async setRefreshTokenCookie(userId: string, res: Response) {
     const token = uuidv4()
-    const tokenHash = await bcrypt.hash(token, 1)
+    const tokenHash = createHash('sha256').update(token).digest('hex')
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
     await this.refreshTokenRepo.save({ userId, tokenHash, expiresAt })
 
+    const isProduction = this.configService.get('NODE_ENV') === 'production'
     res.cookie('refresh_token', token, {
       httpOnly: true,
-      secure: this.configService.get('NODE_ENV') === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       expires: expiresAt,
     })
   }
