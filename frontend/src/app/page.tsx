@@ -20,7 +20,7 @@ export default function HomePage() {
             <nav className="hidden md:flex items-center gap-6 text-sm">
               <Link href="/about" className="hover:text-nysc-gold transition-colors">About</Link>
               <Link href="/contact" className="hover:text-nysc-gold transition-colors">Contact</Link>
-              <Link href="/auth/login" className="btn-secondary !text-nysc-green text-sm py-2 px-4">
+              <Link href="/login" className="btn-secondary !text-nysc-green text-sm py-2 px-4">
                 Login
               </Link>
             </nav>
@@ -40,13 +40,13 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/auth/register"
+              href="/register"
               className="bg-nysc-gold text-nysc-green-dark font-bold px-8 py-3 rounded-lg hover:bg-yellow-400 transition-colors"
             >
               Register Now
             </Link>
             <Link
-              href="/auth/login"
+              href="/login"
               className="bg-white/10 border border-white/30 text-white font-bold px-8 py-3 rounded-lg hover:bg-white/20 transition-colors"
             >
               Login to Portal
