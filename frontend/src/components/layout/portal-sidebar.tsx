@@ -30,6 +30,9 @@ export function PortalSidebar() {
   const isOpen = useSidebarStore((s) => s.isOpen)
   const close = useSidebarStore((s) => s.close)
 
+  const initial = user?.email?.[0]?.toUpperCase() ?? 'C'
+  const displayEmail = user?.email ?? 'Corps Member'
+
   async function handleLogout() {
     try { await api.post('/auth/logout') } catch { /* continue */ }
     clearAuth()
@@ -41,14 +44,12 @@ export function PortalSidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-green-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-nysc-gold rounded-full flex items-center justify-center font-bold text-nysc-green text-sm">
+          <div className="w-9 h-9 bg-nysc-gold rounded-xl flex items-center justify-center font-black text-nysc-green-deep text-xs shrink-0">
             NYSC
           </div>
-          <div>
-            <p className="font-bold text-sm leading-none">NYSC Portal</p>
-            <p className="text-xs text-green-300 truncate max-w-[110px]">
-              {user?.email ?? 'Corps Member'}
-            </p>
+          <div className="min-w-0">
+            <p className="font-bold text-sm text-white leading-none">NYSC Portal</p>
+            <p className="text-[11px] text-green-400 truncate mt-0.5">{displayEmail}</p>
           </div>
         </div>
         <button onClick={close} className="md:hidden p-1 rounded hover:bg-white/10" aria-label="Close navigation">
@@ -76,14 +77,22 @@ export function PortalSidebar() {
         ))}
       </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-green-700">
+      {/* Avatar strip + logout */}
+      <div className="p-3 border-t border-white/10 space-y-1">
+        {/* User info strip */}
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/5">
+          <div className="w-7 h-7 bg-nysc-green-light rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0">
+            {initial}
+          </div>
+          <p className="text-xs text-green-200 truncate flex-1">{displayEmail}</p>
+        </div>
+
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-green-200 hover:bg-white/10 hover:text-white transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-green-400 hover:bg-white/10 hover:text-white transition-all w-full"
         >
-          <LogOut size={18} />
-          Logout
+          <LogOut size={17} className="shrink-0" />
+          Sign Out
         </button>
       </div>
     </aside>
