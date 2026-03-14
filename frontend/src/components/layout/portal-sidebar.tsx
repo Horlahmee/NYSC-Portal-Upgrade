@@ -32,6 +32,9 @@ export function PortalSidebar() {
   const user = useAuthStore((s) => s.user)
   const clearAuth = useAuthStore((s) => s.clearAuth)
 
+  const initial = user?.email?.[0]?.toUpperCase() ?? 'C'
+  const displayEmail = user?.email ?? 'Corps Member'
+
   async function handleLogout() {
     try {
       await api.post('/auth/logout')
@@ -44,49 +47,77 @@ export function PortalSidebar() {
   }
 
   return (
-    <aside className="w-64 bg-nysc-green text-white flex flex-col min-h-screen hidden md:flex">
-      {/* Logo */}
-      <div className="p-6 border-b border-green-700">
+    <aside
+      className="w-64 flex flex-col min-h-screen hidden md:flex shrink-0"
+      style={{ background: 'linear-gradient(180deg, #002800 0%, #004500 60%, #005000 100%)' }}
+    >
+      {/* Logo / user area */}
+      <div className="p-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-nysc-gold rounded-full flex items-center justify-center font-bold text-nysc-green text-sm">
+          <div className="w-9 h-9 bg-nysc-gold rounded-xl flex items-center justify-center font-black text-nysc-green-deep text-xs shrink-0">
             NYSC
           </div>
-          <div>
-            <p className="font-bold text-sm leading-none">NYSC Portal</p>
-            <p className="text-xs text-green-300 truncate max-w-[110px]">
-              {user?.email ?? 'Corps Member'}
-            </p>
+          <div className="min-w-0">
+            <p className="font-bold text-sm text-white leading-none">NYSC Portal</p>
+            <p className="text-[11px] text-green-400 truncate mt-0.5">{displayEmail}</p>
           </div>
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={clsx(
-              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-              pathname === href || pathname.startsWith(href + '/')
-                ? 'bg-white/20 text-white'
-                : 'text-green-200 hover:bg-white/10 hover:text-white'
-            )}
-          >
-            <Icon size={18} />
-            {label}
-          </Link>
-        ))}
+      {/* Nav section label */}
+      <div className="px-5 pt-5 pb-2">
+        <p className="text-[10px] text-green-600 font-bold uppercase tracking-[0.18em]">
+          Menu
+        </p>
+      </div>
+
+      {/* Nav items */}
+      <nav className="flex-1 px-3 space-y-0.5 pb-4">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href || pathname.startsWith(href + '/')
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={clsx(
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
+                isActive
+                  ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]'
+                  : 'text-green-300 hover:bg-white/10 hover:text-white'
+              )}
+            >
+              <Icon
+                size={17}
+                className={clsx(
+                  'shrink-0 transition-colors',
+                  isActive ? 'text-nysc-gold' : 'text-green-400 group-hover:text-green-200'
+                )}
+              />
+              <span className="flex-1">{label}</span>
+              {isActive && (
+                <span className="w-1.5 h-1.5 bg-nysc-gold rounded-full shrink-0" />
+              )}
+            </Link>
+          )
+        })}
       </nav>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-green-700">
+      {/* Avatar strip + logout */}
+      <div className="p-3 border-t border-white/10 space-y-1">
+        {/* User info strip */}
+        <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/5">
+          <div className="w-7 h-7 bg-nysc-green-light rounded-lg flex items-center justify-center text-white font-bold text-xs shrink-0">
+            {initial}
+          </div>
+          <p className="text-xs text-green-200 truncate flex-1">{displayEmail}</p>
+        </div>
+
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-green-200 hover:bg-white/10 hover:text-white transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-green-400 hover:bg-white/10 hover:text-white transition-all w-full"
         >
-          <LogOut size={18} />
-          Logout
+          <LogOut size={17} className="shrink-0" />
+          Sign Out
         </button>
       </div>
     </aside>
