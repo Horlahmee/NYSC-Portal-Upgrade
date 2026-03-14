@@ -80,9 +80,9 @@ export function PortalSidebar() {
               key={href}
               href={href}
               className={clsx(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150',
+                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 relative',
                 isActive
-                  ? 'bg-white/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]'
+                  ? 'bg-white/15 text-white before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-0.5 before:bg-nysc-gold before:rounded-full'
                   : 'text-green-300 hover:bg-white/10 hover:text-white'
               )}
             >

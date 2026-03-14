@@ -54,7 +54,7 @@ export function InitiatePayment() {
 
       <div className="bg-nysc-green/5 border border-nysc-green/20 rounded-lg p-4 text-sm">
         <p className="text-gray-600 font-medium">{selected.label}</p>
-        <p className="text-2xl font-bold text-nysc-green mt-1">
+        <p className="text-2xl font-bold text-nysc-green mt-1 tabular">
           ₦{selected.amount.toLocaleString()}
         </p>
       </div>

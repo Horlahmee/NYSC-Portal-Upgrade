@@ -64,7 +64,7 @@ export function PaymentHistory() {
                 <tr key={p.id} className="hover:bg-gray-50">
                   <td className="py-3 font-mono text-xs text-gray-600">{p.rrr ?? '—'}</td>
                   <td className="py-3 text-gray-700 capitalize">{p.paymentType}</td>
-                  <td className="py-3 font-medium">₦{Number(p.amount).toLocaleString()}</td>
+                  <td className="py-3 font-medium tabular">₦{Number(p.amount).toLocaleString()}</td>
                   <td className="py-3 text-gray-500">
                     {new Date(p.createdAt).toLocaleDateString('en-NG')}
                   </td>

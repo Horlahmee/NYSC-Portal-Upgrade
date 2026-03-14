@@ -13,8 +13,17 @@
   }
 
   body {
-    @apply bg-slate-50 text-gray-900 antialiased;
+    @apply bg-slate-50 text-gray-900 antialiased font-sans;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+
+  /* Tabular numbers for financial data */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
