@@ -24,7 +24,7 @@ export class LgaClearance {
   notes: string
 
   @Column({ name: 'cleared_at', type: 'timestamptz', nullable: true })
-  clearedAt: Date
+  clearedAt: Date | null
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date
