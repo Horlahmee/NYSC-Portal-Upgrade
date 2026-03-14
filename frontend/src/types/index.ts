@@ -68,6 +68,7 @@ export interface Payment {
   month?: number
   year?: number
   initiatedAt: string
+  createdAt?: string
   confirmedAt?: string
 }
 
@@ -90,6 +91,8 @@ export interface LgaClearance {
   lgaId: number
   status: ClearanceStatus
   queryReason?: string
+  notes?: string
+  createdAt?: string
   clearedAt?: string
 }
 

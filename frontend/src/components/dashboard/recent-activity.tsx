@@ -22,7 +22,7 @@ function fromPayments(payments: Payment[]): ActivityItem[] {
     id: `pay-${p.id}`,
     title: `${p.paymentType} payment — ${p.status}`,
     type: 'payment',
-    time: new Date(p.createdAt),
+    time: new Date(p.createdAt ?? p.initiatedAt),
   }))
 }
 
@@ -40,7 +40,7 @@ function fromClearance(clearances: LgaClearance[]): ActivityItem[] {
     id: `clr-${cl.id}`,
     title: `LGA clearance — ${cl.status}`,
     type: 'clearance',
-    time: new Date(cl.createdAt),
+    time: new Date(cl.createdAt ?? cl.clearedAt ?? Date.now()),
   }))
 }
 
