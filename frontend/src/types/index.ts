@@ -70,7 +70,6 @@ export interface Payment {
   month?: number
   year?: number
   initiatedAt: string
-  createdAt?: string
   confirmedAt?: string
   createdAt: string
   updatedAt: string
