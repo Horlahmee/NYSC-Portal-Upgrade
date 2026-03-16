@@ -46,10 +46,19 @@ export function RegisterForm() {
       // Redirect to login after a short delay so the user can read the message
       setTimeout(() => router.push('/login'), 3000)
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message
+      console.error('[register error]', err)
+      const e = err as { response?: { status?: number; data?: { message?: string | string[] } }; message?: string }
+      const msg = e?.response?.data?.message
       const text = Array.isArray(msg) ? msg[0] : msg
-      setServerError(typeof text === 'string' ? text : 'Registration failed. Please try again.')
+      if (typeof text === 'string') {
+        setServerError(text)
+      } else if (e?.response?.status) {
+        setServerError(`Request failed with status ${e.response.status}. Check the browser console for details.`)
+      } else if (e?.message) {
+        setServerError(e.message)
+      } else {
+        setServerError('Registration failed. Please try again.')
+      }
     }
   }
 
