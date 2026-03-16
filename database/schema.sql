@@ -97,14 +97,14 @@ CREATE TABLE users (
 CREATE TABLE corps_members (
     id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id             UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-    state_code          VARCHAR(20) NOT NULL UNIQUE,  -- e.g. LA/23A/1234
+    state_code          VARCHAR(20) UNIQUE,           -- e.g. LA/23A/1234, assigned by NYSC after registration
     nin                 VARCHAR(11) UNIQUE,
     bvn                 VARCHAR(11),
     first_name          VARCHAR(100) NOT NULL,
     middle_name         VARCHAR(100),
     last_name           VARCHAR(100) NOT NULL,
-    date_of_birth       DATE NOT NULL,
-    gender              gender NOT NULL,
+    date_of_birth       DATE,
+    gender              gender,
     marital_status      marital_status DEFAULT 'single',
     state_of_origin_id  INTEGER REFERENCES states(id),
     lga_of_origin_id    INTEGER REFERENCES lgas(id),
