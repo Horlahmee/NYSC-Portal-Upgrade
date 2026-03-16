@@ -12,9 +12,30 @@ async function bootstrap() {
   app.use(helmet())
   app.use(compression())
 
+  // Request logger (dev + production diagnostic)
+  app.use((req: import('express').Request, _res: import('express').Response, next: import('express').NextFunction) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path} | Origin: ${req.headers.origin || 'none'}`)
+    next()
+  })
+
   // CORS
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    'http://localhost:3000',
+  ].filter(Boolean).map(o => o!.replace(/\/$/, '')) // strip trailing slashes
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // allow server-to-server / Swagger (no origin)
+      if (!origin) return callback(null, true)
+      const normalized = origin.replace(/\/$/, '')
+      if (allowedOrigins.includes(normalized)) {
+        callback(null, true)
+      } else {
+        console.warn(`[CORS] Blocked origin: ${origin} | Allowed: ${allowedOrigins.join(', ')}`)
+        callback(new Error(`CORS: origin ${origin} not allowed`))
+      }
+    },
     credentials: true,
   })
 
