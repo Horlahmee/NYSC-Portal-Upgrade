@@ -3,7 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_API_URL": "NEXT_PUBLIC_API_URL=nysc-portal-upgrade-production.up.railway.app",
+    "NEXT_PUBLIC_API_URL": "https://nysc-portal-upgrade-production.up.railway.app",
     "NEXT_PUBLIC_APP_NAME": "NYSC Portal"
   },
   "headers": [
