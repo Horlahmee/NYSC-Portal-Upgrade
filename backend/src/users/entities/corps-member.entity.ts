@@ -12,6 +12,9 @@ export class CorpsMember {
   @Column({ name: 'user_id', unique: true })
   userId: string
 
+  @Column({ nullable: true, unique: true })
+  nin: string
+
   @Column({ name: 'state_code', nullable: true })
   stateCode: string
 

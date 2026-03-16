@@ -59,8 +59,8 @@ export class UsersService {
     return { users, total, page, limit, totalPages: Math.ceil(total / limit) }
   }
 
-  async createCorpsMember(userId: string, firstName: string, lastName: string): Promise<CorpsMember> {
-    const member = this.corpsMemberRepo.create({ userId, firstName, lastName, status: 'pending' })
+  async createCorpsMember(userId: string, firstName: string, lastName: string, nin?: string): Promise<CorpsMember> {
+    const member = this.corpsMemberRepo.create({ userId, firstName, lastName, nin, status: 'pending' })
     return this.corpsMemberRepo.save(member)
   }
 
