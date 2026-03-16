@@ -36,7 +36,10 @@ export class AuthService {
     const user = await this.usersService.create({ ...dto, passwordHash })
 
     // Create a stub CorpsMember profile linked to the new user
-    await this.usersService.createCorpsMember(user.id, dto.firstName, dto.lastName, dto.nin)
+    // Non-critical: profile can be completed on first login
+    try {
+      await this.usersService.createCorpsMember(user.id, dto.firstName, dto.lastName, dto.nin)
+    } catch (_) {}
 
     return { message: 'Registration successful. Please verify your email.' }
   }
